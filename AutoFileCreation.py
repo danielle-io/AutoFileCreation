@@ -7,18 +7,34 @@ from pathlib import Path
 load_dotenv()
 
 # Retrieve environment variables
-example_item_name = os.getenv('EXAMPLE_ITEM_NAME')
-new_value = os.getenv('NEW_VALUE')
-app_name = os.getenv('APP_NAME')
-destination = os.getenv('DESTINATION')
 is_mac = os.getenv('IS_MAC')
+example_model_name = os.getenv('EXAMPLE_ITEM_NAME')
+new_model_name = os.getenv('NEW_MODEL_NAME')
+app_name = os.getenv('APP_NAME')
+destination = os.getenv('ROOT_FOLDER')
+your_name = os.getenv('YOU_NAME')
 
-if not example_item_name or not new_value or not app_name or not destination:
-    raise ValueError("Environment variables 'EXAMPLE_ITEM_NAME' and 'NEW_VALUE' must be set")
+missing_vars = []
 
-new_model_item_name_camel_case = new_value[0].lower() + new_value[1:]
-example_item_name_camel_case = example_item_name[0].lower() + example_item_name[1:]
+if not is_mac:
+    missing_vars.append('IS_MAC')
+if not example_model_name:
+    missing_vars.append('EXAMPLE_ITEM_NAME')
+if not new_model_name:
+    missing_vars.append('NEW_MODEL_NAME')
+if not app_name:
+    missing_vars.append('APP_NAME')
+if not destination:
+    missing_vars.append('ROOT_FOLDER')
+if not your_name:
+    missing_vars.append('YOUR_NAME')
 
+if missing_vars != []:
+    print(f'Missing environment variables: {", ".join(missing_vars)}')
+    raise ValueError('Environment variables must be set')
+
+new_model_item_name_camel_case = new_model_name[0].lower() + new_model_name[1:]
+example_model_name_camel_case = example_model_name[0].lower() + example_model_name[1:]
 
 def main():
     # ------ Start: Put each set of file names and locations here
@@ -42,30 +58,47 @@ def main():
 
 def create_basic_model(fill_in_file_name, file_path):
     # Add to empty file
-    new_file_name = fill_in_file_name.replace('_', new_value)
-    
-    if (is_mac == 'true'):
-        file_path.replace('\\', '/')
-    
-    example_item_file_name = fill_in_file_name.replace('_', example_item_name)
+    new_file_name = fill_in_file_name.replace('_', new_model_name)
+    example_item_file_name = fill_in_file_name.replace('_', example_model_name)
     new_file_path = f'{file_path}{new_file_name}'
-    file_content = 'This is the content of the new file.'
+    
+    copied_file_path = Path(new_file_path)
 
-    with open(new_file_path, 'w') as file:
-        file.write(content)
+    if is_mac == 'true':
+        file_path = file_path.replace('\\', '/')
+    
+    if copied_file_path.is_file():
+        print(new_file_path + ' already exists, skipping')
+        
+    else:
+        template_file = os.path.join(os.path.dirname(__file__), 'ModelTemplate.txt')
+
+        with open(template_file, 'r') as file:
+            template_content = file.read()
+        
+        template_content = template_content.replace('{your_name}', your_name)
+        template_content = template_content.replace('{app_name}', app_name)
+        template_content = template_content.replace('{app_name}', app_name)
+        template_content = template_content.replace('{new_model_name}', new_model_name)
+
+        with open(new_file_path, 'w') as file:
+            file.write(template_content)
 
 def copy_example_to_new_file(fill_in_file_name, file_path):
     # Copy to empty file
-    new_file_name = fill_in_file_name.replace('_', new_value)
+    new_file_name = fill_in_file_name.replace('_', new_model_name)
+    
     if is_mac == 'true':
         file_path = file_path.replace('\\', '/')
 
-    example_item_file_name = fill_in_file_name.replace('_', example_item_name)
+    example_item_file_name = fill_in_file_name.replace('_', example_model_name)
     new_file_path = f'{file_path}{new_file_name}'
 
     copied_file_path = Path(new_file_path)
+    
     if copied_file_path.is_file():
-        print(new_file_path + ' already exists, skipping')
+        print(f'{new_file_path} already exists, skipping')
+        
     else:
         shutil.copyfile(f'{file_path}{example_item_file_name}', new_file_path)
 
@@ -73,15 +106,14 @@ def copy_example_to_new_file(fill_in_file_name, file_path):
         with open(new_file_path, 'r') as file: content = file.read()
 
         # Replace all instances of the title case variable
-        content = content.replace(example_item_name, new_value)
+        content = content.replace(example_model_name, new_model_name)
 
         # Replace all instances of the camelCase variable
-        content = content.replace(example_item_name_camel_case, new_model_item_name_camel_case)
+        content = content.replace(example_model_name_camel_case, new_model_item_name_camel_case)
 
         # Write the modified content back to the file
         with open(new_file_path, 'w') as file: file.write(content)
-        print('Created '+new_file_path)
-
+        print(f'Created {new_file_path}')
 
 if __name__ == "__main__":
     main()
