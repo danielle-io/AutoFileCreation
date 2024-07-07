@@ -23,26 +23,26 @@ def main():
 
     # IStorage
     i_storage_file_name = 'IStorageBroker._s.cs'
-    location = f'{destination}{app_name}.Api/Brokers/Storages/'
+    location = f'{destination}{app_name}.Api\\Brokers\\Storages\\'
     copy_example_to_new_file(i_storage_file_name, location)
 
     # Storage
     storage_file_name = 'StorageBroker._s.cs'
-    location = f'{destination}{app_name}.Api/Brokers/Storages/'
+    location = f'{destination}{app_name}.Api\\Brokers\\Storages\\'
     copy_example_to_new_file(storage_file_name, location)
 
 
 # ------ End: Put each set of file names and locations here
 
-def copy_example_to_new_file(storage_file_name, file_path):
+def copy_example_to_new_file(fill_in_file_name, file_path):
     # Copy to empty file
-    file_name = storage_file_name.replace('_', new_value)
-    example_item_file_name = file_name.replace('_', example_item_name)
-    new_file_path = f'{file_path}{file_name}'
+    new_file_name = fill_in_file_name.replace('_', new_value)
+    example_item_file_name = fill_in_file_name.replace('_', example_item_name)
+    new_file_path = f'{file_path}{new_file_name}'
     shutil.copyfile(f'{file_path}{example_item_file_name}', new_file_path)
 
     # Replace content
-    with open(file_path, 'r') as file: content = file.read()
+    with open(new_file_path, 'r') as file: content = file.read()
 
     # Replace all instances of the title case variable
     content = content.replace(example_item_name, new_value)
@@ -51,7 +51,7 @@ def copy_example_to_new_file(storage_file_name, file_path):
     content = content.replace(example_item_name_camel_case, new_model_item_name_camel_case)
 
     # Write the modified content back to the file
-    with open(file_path, 'w') as file: file.write(content)
+    with open(new_file_path, 'w') as file: file.write(content)
 
 
 if __name__ == "__main__":
