@@ -8,7 +8,7 @@ load_dotenv()
 
 # Retrieve environment variables
 is_mac = os.getenv('IS_MAC')
-example_model_name = os.getenv('EXAMPLE_ITEM_NAME')
+example_model_name = os.getenv('EXAMPLE_MODEL_NAME')
 new_model_name = os.getenv('NEW_MODEL_NAME')
 app_name = os.getenv('APP_NAME')
 destination = os.getenv('ROOT_FOLDER')
@@ -19,7 +19,7 @@ missing_vars = []
 if not is_mac:
     missing_vars.append('IS_MAC')
 if not example_model_name:
-    missing_vars.append('EXAMPLE_ITEM_NAME')
+    missing_vars.append('EXAMPLE_MODEL_NAME')
 if not new_model_name:
     missing_vars.append('NEW_MODEL_NAME')
 if not app_name:
@@ -39,6 +39,11 @@ example_model_name_camel_case = example_model_name[0].lower() + example_model_na
 def main():
     # ------ Start: Put each set of file names and locations here
 
+    # Models
+    model_file_name = f'{new_model_name}.cs'
+    location = f'{destination}{app_name}.Api\\Models\\Foundations\\{new_model_name}s\\'
+    create_basic_model(model_file_name, location)
+    
     # IStorages
     i_storage_file_name = 'IStorageBroker._s.cs'
     location = f'{destination}{app_name}.Api\\Brokers\\Storages\\'
@@ -56,12 +61,9 @@ def main():
 
 # ------ End: Put each set of file names and locations here
 
-def create_basic_model(fill_in_file_name, file_path):
+def create_basic_model(model_file_name, file_path):
     # Add to empty file
-    new_file_name = fill_in_file_name.replace('_', new_model_name)
-    example_item_file_name = fill_in_file_name.replace('_', example_model_name)
-    new_file_path = f'{file_path}{new_file_name}'
-    
+    new_file_path = f'{file_path}{model_file_name}'
     copied_file_path = Path(new_file_path)
 
     if is_mac == 'true':
@@ -71,6 +73,9 @@ def create_basic_model(fill_in_file_name, file_path):
         print(new_file_path + ' already exists, skipping')
         
     else:
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+    
         template_file = os.path.join(os.path.dirname(__file__), 'ModelTemplate.txt')
 
         with open(template_file, 'r') as file:
@@ -78,11 +83,12 @@ def create_basic_model(fill_in_file_name, file_path):
         
         template_content = template_content.replace('{your_name}', your_name)
         template_content = template_content.replace('{app_name}', app_name)
-        template_content = template_content.replace('{app_name}', app_name)
         template_content = template_content.replace('{new_model_name}', new_model_name)
 
         with open(new_file_path, 'w') as file:
             file.write(template_content)
+            
+       print(f'Created {new_file_path}')
 
 def copy_example_to_new_file(fill_in_file_name, file_path):
     # Copy to empty file
