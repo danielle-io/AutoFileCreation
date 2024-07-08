@@ -42,7 +42,10 @@ def main():
     # Models
     model_file_name = f'{new_model_name}.cs'
     location = f'{destination}{app_name}.Api\\Models\\Foundations\\{new_model_name}s\\'
-    create_basic_model(model_file_name, location)
+    example_exceptions_location = f'{destination}{app_name}.Api\\Models\\Foundations\\{example_model_name}s\\Exceptions\\'
+    create_basic_model(model_file_name, location, example_exceptions_location)
+    
+    # TODO: alter the StorageBoker and IStorageBroker by adding Congfigure to OnModelCreating
     
     # IStorages
     i_storage_file_name = 'IStorageBroker._s.cs'
@@ -58,23 +61,61 @@ def main():
     controller_file_name = '_sController.cs'
     location = f'{destination}{app_name}.Api\\Controllers\\'
     copy_example_to_new_file(controller_file_name, location)
-
+    
+    # Services
+    example_service_path_str = f'{destination}{app_name}.Api\\Services\\Foundations\\{example_model_name}s'
+    create_service_files(example_service_path_str)
+    
 # ------ End: Put each set of file names and locations here
 
-def create_basic_model(model_file_name, file_path):
-    # Add to empty file
-    new_file_path = f'{file_path}{model_file_name}'
-    copied_file_path = Path(new_file_path)
+def create_service_files(example_service_path_str):
+    new_service_directory_str = example_service_path_str.replace(example_model_name, new_model_name)
 
     if is_mac == 'true':
-        file_path = file_path.replace('\\', '/')
-    
-    if copied_file_path.is_file():
-        print(new_file_path + ' already exists, skipping')
-        
+        new_service_directory_str = new_service_directory_str.replace('\\', '/')
+        example_service_path_str = example_service_path_str.replace('\\', '/')
+
+    new_service_directory_path = Path(new_service_directory_str)
+
+    # Check if the file already exists
+    if new_service_directory_path.is_file():
+        print(f'{new_service_directory_str} already exists, skipping')
     else:
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
+        # Ensure parent directory exists before creating the file
+        new_service_directory_path.parent.mkdir(parents=True, exist_ok=True)
+    
+      
+    example_directory = Path(example_service_path_str)
+
+    # Loop over files in the directory
+    for example_path in example_directory.iterdir():
+        if example_path.is_file():
+            # Process each file
+            example_path_str = str(example_path)
+            new_file_path_str = example_path_str.replace(example_model_name, new_model_name)
+            new_file_path = Path(new_file_path_str)
+
+            # Create new file and change content to match new model
+            copy_single_file(example_exceptions_path, new_file_path)
+            
+def create_basic_model(model_file_name, file_path_str, example_exceptions_location_str):
+    # Add to empty file
+    new_file_path_str = f'{file_path_str}{model_file_name}'
+    new_exceptions_directory_str = example_exceptions_location_str.replace(example_model_name, new_model_name)
+
+    if is_mac == 'true':
+        new_file_path_str = new_file_path_str.replace('\\', '/')
+        example_exceptions_location_str = example_exceptions_location_str.replace('\\', '/')
+        new_exceptions_directory_str = new_exceptions_directory_str.replace('\\', '/')
+
+    new_file_path = Path(new_file_path_str)
+
+    # Check if the file already exists
+    if new_file_path.is_file():
+        print(f'{new_file_path_str} already exists, skipping')
+    else:
+        # Ensure parent directory exists before creating the file
+        new_file_path.parent.mkdir(parents=True, exist_ok=True)
     
         template_file = os.path.join(os.path.dirname(__file__), 'ModelTemplate.txt')
 
@@ -85,13 +126,63 @@ def create_basic_model(model_file_name, file_path):
         template_content = template_content.replace('{app_name}', app_name)
         template_content = template_content.replace('{new_model_name}', new_model_name)
 
-        with open(new_file_path, 'w') as file:
-            file.write(template_content)
-            
-       print(f'Created {new_file_path}')
+        # Create the file (if it doesn't exist)
+        if not new_file_path.exists():
+            with open(new_file_path, 'w') as file:
+                # Optionally, write initial content to the file
+                file.write(template_content)
 
+            print(f'{new_file_path_str} created successfully')
+        else:
+            print(f'{new_file_path_str} already exists, skipping')
+            
+        print(f'Created {new_file_path_str}')
+    
+    example_exceptions_directory = Path(example_exceptions_location_str)
+
+    # Ensure the directory exists
+    example_exceptions_directory.mkdir(parents=True, exist_ok=True)
+
+    # Loop over files in the directory
+    for example_exceptions_path in example_exceptions_directory.iterdir():
+        if example_exceptions_path.is_file():
+            # Process each file
+            example_exceptions_path_str = str(example_exceptions_path)
+            new_file_path_str = example_exceptions_path_str.replace(example_model_name, new_model_name)
+            new_file_path = Path(new_file_path_str)
+
+            # Create new file and change content to match new model
+            copy_single_file(example_exceptions_path, new_file_path)
+                
+def copy_single_file(example_file_path, new_file_path):
+    if is_mac == 'true':
+        example_file_path = example_file_path.as_posix()
+        new_file_path = new_file_path.as_posix()
+
+    if new_file_path.is_file():
+        print(f'{new_file_path} already exists, skipping')
+    else:
+        # Ensure parent directory exists before copying the file
+        new_file_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Copy file
+        shutil.copyfile(example_file_path, new_file_path)
+
+        # Read content from the original file
+        with open(new_file_path, 'r') as file:
+            content = file.read()
+
+        # Replace placeholders in the content
+        content = content.replace(example_model_name, new_model_name)
+        content = content.replace(example_model_name_camel_case, new_model_item_name_camel_case)
+
+        # Write modified content back to the new file
+        with open(new_file_path, 'w') as file:
+            file.write(content)
+
+        print(f'Created {new_file_path}')
+                    
 def copy_example_to_new_file(fill_in_file_name, file_path):
-    # Copy to empty file
     new_file_name = fill_in_file_name.replace('_', new_model_name)
     
     if is_mac == 'true':
