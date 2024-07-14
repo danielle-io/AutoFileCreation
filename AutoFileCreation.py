@@ -1,3 +1,5 @@
+from ctypes import Array
+from hmac import new
 import shutil
 import os
 from dotenv import load_dotenv
@@ -45,7 +47,27 @@ def main():
     example_exceptions_location = f'{destination}{app_name}.Api\\Models\\Foundations\\{example_model_name}s\\Exceptions\\'
     create_basic_model(model_file_name, location, example_exceptions_location)
     
-    # TODO: alter the StorageBoker and IStorageBroker by adding Congfigure to OnModelCreating
+    # ModelState 
+    new_location = f'{destination}{app_name}.Api\\Models\\Foundations\\{new_model_name}\\{new_model_name}State.cs'
+    old_location = new_location.replace(new_model_name, example_model_name);
+    copy_single_file(old_location, new_location);
+
+    # Assignment Models
+    Array<string> assignmentFiles;
+    assignmentFiles =  ['AssignmentStatus', 'AssignmentState', 'Assignment'];
+    
+    for file_name in assignmentFiles:
+        new_location = f'{destination}{app_name}.Api\\Models\\Foundations\\{new_model_name}Assignments\\{new_model_name}{file_name}.cs'
+        old_location = new_location.replace(new_model_name, example_model_name);
+        copy_single_file(old_location, new_location);
+        
+
+    example_exceptions_location = f'{destination}{app_name}.Api\\Models\\Foundations\\{example_model_name}s\\Exceptions\\'
+    
+    # The model is already made so this will just copy in the exceptions
+    create_basic_model(model_file_name, location, example_exceptions_location)
+    
+    # TODO: alter the StorageBoker and IStorageBroker by adding Configure to OnModelCreating
     
     # IStorages
     i_storage_file_name = 'IStorageBroker._s.cs'
@@ -65,6 +87,18 @@ def main():
     # Services
     example_service_path_str = f'{destination}{app_name}.Api\\Services\\Foundations\\{example_model_name}s'
     create_service_files(example_service_path_str)
+
+    # Coordinations folder + Exceptions
+    example_coordination_service_path_str = f'{destination}{app_name}.Api\\Services\\Coordinations\\{example_model_name}Assignments'
+    create_service_files(example_coordination_service_path_str)
+    
+    # TODO Orchestrations folder + Exceptions
+
+    
+    # TODO: copy each file in that folder and replace the model name with the new model name
+    # Acceptance Tests
+    # example_acceptance_tests = f'{destination}{app_name}.Api.Tests.Acceptance\APIs\\{example_model_name}'
+    
     
 # ------ End: Put each set of file names and locations here
 

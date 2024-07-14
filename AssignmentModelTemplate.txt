@@ -11,6 +11,15 @@ namespace {app_name}.Api.Models.Foundations.{app_name}s
     public class {new_model_name}
     {
         public Guid Id { get; set; }
+        public Guid ContactId { get; set; }
+        public Contact Contact { get; set; }
+        public Guid CarePersonId { get; set; }
+        public CarePerson CarePerson { get; set; }
+        // Assigner can set to inactive to revoke access
+        public {new_model_name}AssignmentState State { get; set; } = {new_model_name}AssignmentState.Active;
+        // Assignee starts pending, then accepts or declines the item
+        public Guid AccessKey { get; set; } = Guid.Empty;
+        public {new_model_name}Status Status { get; set; } = {new_model_name}AssignmentStatus.NotSent;
         public DateTimeOffset CreatedDate { get; set; }
         public DateTimeOffset UpdatedDate { get; set; }
         public Guid CreatedBy { get; set; }
