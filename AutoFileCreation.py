@@ -51,7 +51,7 @@ def main():
     
     # Main model + other models in scope (i.e. ModelState, ModelStatus, etc.) (folder of files)
     example_location_str = f'{destination}{app_name}.Api\\Models\\Foundations\\{example_model_name}s\\'
-    copy_and_alter_dir_files(example_exceptions_location, example_model_name, new_model_name)
+    copy_and_alter_dir_files(example_location_str, example_model_name, new_model_name)
 
     # Model Exceptions (folder of files)
     example_exceptions_location = f'{destination}{app_name}.Api\\Models\\Foundations\\{example_model_name}s\\Exceptions\\'
@@ -126,8 +126,8 @@ def main():
         copy_and_alter_dir_files(example_dir_path_str, example_assignment_name, new_assignment_name)
         
         if add_matching_assignment_coordination_files:
-            # Assignment Coordinations Exceptions folder 
-            example_coordination_service_path_str = f'{destination}{app_name}.Api\\Services\\Coordinations\\{example_assignment_name}s\\Exceptions\\'
+            # Assignment Coordinations folder 
+            example_coordination_service_path_str = f'{destination}{app_name}.Api\\Services\\Coordinations\\{example_assignment_name}s\\'
             copy_and_alter_dir_files(example_coordination_service_path_str, example_assignment_name, new_assignment_name)
 
             # Assignment Coordinations Unit Tests
@@ -142,8 +142,8 @@ def main():
             copy_and_alter_dir_files(example_orchestration_service_path_str, example_assignment_name, new_assignment_name)
             
             # Assignment Orchestrations Exceptions folder  
-            example_coordination_service_path_str = f'{destination}{app_name}.Api\\Services\\Orchestrations\\{orchestration_example_assignment_name}s\\Exceptions\\'
-            copy_and_alter_dir_files(example_coordination_service_path_str, example_assignment_name, new_assignment_name)
+            # example_coordination_service_path_str = f'{destination}{app_name}.Api\\Services\\Orchestrations\\{orchestration_example_assignment_name}s\\Exceptions\\'
+            # copy_and_alter_dir_files(example_coordination_service_path_str, example_assignment_name, new_assignment_name)
             
             # Assignment Orchestrations Unit Tests
             example_dir_path_str = f'{destination}{app_name}.Api.Tests.Unit\\Services\\Orchestrations\\{orchestration_example_assignment_name}s'
@@ -164,28 +164,6 @@ def get_camel_case(word):
 def get_snake_case(word):
     return word[0].lower() + word[1:]
 
-def create_assignment_models():
-    Array<string> assignmentFiles;
-    # TODO: get these dynamically instead of hardcoding by looping over files in the folder
-    assignmentFiles =  ['AssignmentStatus', 'AssignmentState', 'Assignment'];
-    
-    # Loop over files in the directory
-    for example_exceptions_path in example_exceptions_directory.iterdir():
-        if example_exceptions_path.is_file():
-            # Process each file
-            example_exceptions_path_str = str(example_exceptions_path)
-            new_file_path_str = example_exceptions_path_str.replace(example_model_name, new_model_name)
-            new_file_path = Path(new_file_path_str)
-
-            # Create new file and change content to match new model
-            copy_and_alter_single_file(example_exceptions_path, new_file_path)
-    
-    for file_name in assignmentFiles:
-        old_location = new_location.replace(new_model_name, example_model_name);
-        copy_and_alter_single_file(old_location, new_location);
-        
-
-    
     # The model is already made so this will just copy in the exceptions
     copy_and_alter_dir_files(example_exceptions_location, model_file_name, new_model_name)
     
@@ -219,7 +197,7 @@ def copy_and_alter_dir_files(example_dir_path_str, curr_example_model_name, curr
             new_file_path = Path(new_file_path_str)
 
             # Create new file and change content to match new model
-            copy_and_alter_single_file(example_exceptions_path, new_file_path)
+            copy_and_alter_single_file(example_path_str, new_file_path, curr_example_model_name, curr_new_model_name)
             
 def create_basic_model(model_file_name, file_path_str, example_exceptions_location_str):
     # Add to empty file
