@@ -17,5 +17,6 @@ namespace {app_name}.Api.Models.Foundations.{app_name}s
         public Profile CreatedByProfile { get; set; }
         public Guid UpdatedBy { get; set; }
         public Profile UpdatedByProfile { get; set; }
+        public IEnumerable<{new_model_name}Assignment> {new_model_name}Assignments { get; set; }
     }
 }
