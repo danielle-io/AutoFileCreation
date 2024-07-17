@@ -96,61 +96,65 @@ def main():
         example_assignment_name = f'{example_model_name}Assignment'
         new_assignment_name = f'{new_model_name}Assignment'
         example_location_str = f'{destination}{app_name}.Api\\Models\\Foundations\\{example_assignment_name}s\\'
-        copy_and_alter_dir_files(example_location_str, example_assignment_name, new_assignment_name);
+        copy_and_alter_dir_files(example_location_str, example_model_name, new_model_name);
     
         # Assignment Exceptions
         example_exceptions_location = f'{destination}{app_name}.Api\\Models\\Foundations\\{example_assignment_name}s\\Exceptions\\'
-        copy_and_alter_dir_files(example_exceptions_location, example_assignment_name, new_assignment_name)
+        copy_and_alter_dir_files(example_exceptions_location, example_model_name, new_model_name)
         
         # Assignment Services
         example_dir_path_str = f'{destination}{app_name}.Api\\Services\\Foundations\\{example_assignment_name}s'
-        copy_and_alter_dir_files(example_dir_path_str, example_assignment_name, new_assignment_name)
+        copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_model_name)
         
         # Assignment Controllers
         controller_file_name = '_sController.cs'
         location = f'{destination}{app_name}.Api\\Controllers\\'
-        copy_example_to_new_file(controller_file_name, location, example_assignment_name, new_assignment_name)
+        copy_example_to_new_file(controller_file_name, location, example_model_name, new_model_name)
         
         # Acceptance Tests APIS
         example_dir_path_str = f'{destination}{app_name}.Api.Tests.Acceptance\\APIs\\'
-        copy_and_alter_dir_files(example_dir_path_str, example_assignment_name, new_assignment_name)
+        copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_assignment_name)
         
         # Acceptance Tests Brokers (single files)
         example_dir_path_str = f'{destination}{app_name}.Api.Tests.Acceptance\\Brokers\\'
         broker_file_name = 'APIBroker._s.cs'
-        copy_example_to_new_file(broker_file_name, example_dir_path_str, example_assignment_name, new_assignment_name)
+        copy_example_to_new_file(broker_file_name, example_dir_path_str, example_model_name, new_assignment_name)
         
         # Unit Tests
         example_dir_path_str = f'{destination}{app_name}.Api.Tests.Unit\\Services\\Foundations\\{example_assignment_name}s'
-        copy_and_alter_dir_files(example_dir_path_str, example_assignment_name, new_assignment_name)
+        copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_model_name)
         
         if add_matching_assignment_coordination_files:
             # Assignment Coordinations models folder 
             example_coordination_service_path_str = f'{destination}{app_name}.Api\\Models\\Coordinations\\{example_assignment_name}s\\Exceptions\\'
-            copy_and_alter_dir_files(example_coordination_service_path_str, example_assignment_name, new_assignment_name)
+            copy_and_alter_dir_files(example_coordination_service_path_str, example_model_name, new_model_name)
             
             # Assignment Coordinations service folder 
             example_coordination_service_path_str = f'{destination}{app_name}.Api\\Services\\Coordinations\\{example_assignment_name}s\\'
-            copy_and_alter_dir_files(example_coordination_service_path_str, example_assignment_name, new_assignment_name)
+            copy_and_alter_dir_files(example_coordination_service_path_str, example_model_name, new_model_name)
 
             # Assignment Coordinations Unit Tests
             example_dir_path_str = f'{destination}{app_name}.Api.Tests.Unit\\Services\\Coordinations\\{example_assignment_name}s'
-            copy_and_alter_dir_files(example_dir_path_str, example_assignment_name, new_assignment_name)
+            copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_model_name)
             
         if add_matching_assignment_orchestration_files:
             orchestration_example_assignment_name = f'{example_assignment_name}Detail'
             
             # Assignment Orchestration Models folder 
-            example_coordination_service_path_str = f'{destination}{app_name}.Api\\Models\\Orchestrations\\{example_assignment_name}s\\'
-            copy_and_alter_dir_files(example_coordination_service_path_str, example_assignment_name, new_assignment_name)
+            example_coordination_service_path_str = f'{destination}{app_name}.Api\\Models\\Orchestrations\\{orchestration_example_assignment_name}s\\'
+            copy_and_alter_dir_files(example_coordination_service_path_str, example_model_name, new_model_name)
             
             # Assignment Orchestrations Model Exceptions folder   
-            example_orchestration_service_path_str = f'{destination}{app_name}.Api\\Services\\Orchestrations\\{orchestration_example_assignment_name}s\\Exceptions\\'
-            copy_and_alter_dir_files(example_orchestration_service_path_str, example_assignment_name, new_assignment_name)
+            example_orchestration_service_path_str = f'{destination}{app_name}.Api\\Models\\Orchestrations\\{orchestration_example_assignment_name}s\\Exceptions\\'
+            copy_and_alter_dir_files(example_orchestration_service_path_str, example_model_name, new_model_name)
+              
+            # Assignment Orchestrations Service folder 
+            example_coordination_service_path_str = f'{destination}{app_name}.Api\\Services\\Orchestrations\\{orchestration_example_assignment_name}s\\'
+            copy_and_alter_dir_files(example_coordination_service_path_str, example_model_name, new_model_name)
             
             # Assignment Orchestrations Unit Tests
             example_dir_path_str = f'{destination}{app_name}.Api.Tests.Unit\\Services\\Orchestrations\\{orchestration_example_assignment_name}s'
-            copy_and_alter_dir_files(example_dir_path_str, example_assignment_name, new_assignment_name)
+            copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_model_name)
     
 # ------ End: Put each set of file names and locations here
 
