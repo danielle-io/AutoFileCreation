@@ -59,13 +59,18 @@ def main():
 
     # TODO: alter the StorageBoker and IStorageBroker by adding Configure to OnModelCreating
     
-    # IStorages (single files)
+    # IStorageBrokers (single files)
     i_storage_file_name = 'IStorageBroker._s.cs'
     location = f'{destination}{app_name}.Api\\Brokers\\Storages\\'
     copy_example_to_new_file(i_storage_file_name, location, example_model_name, new_model_name)
 
-    # Storages (single files)
+    # Storage Brokers (single files)
     storage_file_name = 'StorageBroker._s.cs'
+    location = f'{destination}{app_name}.Api\\Brokers\\Storages\\'
+    copy_example_to_new_file(storage_file_name, location, example_model_name, new_model_name)
+    
+    # Configuration for Storage Broker (single files)
+    storage_file_name = 'StorageBroker._s.Configurations.cs'
     location = f'{destination}{app_name}.Api\\Brokers\\Storages\\'
     copy_example_to_new_file(storage_file_name, location, example_model_name, new_model_name)
     
@@ -102,6 +107,21 @@ def main():
         example_exceptions_location = f'{destination}{app_name}.Api\\Models\\Foundations\\{example_assignment_name}s\\Exceptions\\'
         copy_and_alter_dir_files(example_exceptions_location, example_model_name, new_model_name)
         
+        # Assignment IBrokers (single files)
+        i_storage_file_name = 'IStorageBroker._s.cs'
+        location = f'{destination}{app_name}.Api\\Brokers\\Storages\\'
+        copy_example_to_new_file(i_storage_file_name, location, example_assignment_name, new_assignment_name,)
+
+        # Assignment Brokers (single files)
+        storage_file_name = 'StorageBroker._s.cs'
+        location = f'{destination}{app_name}.Api\\Brokers\\Storages\\'
+        copy_example_to_new_file(storage_file_name, location, example_assignment_name, new_assignment_name)
+        
+        # Configuration for Assignment Storage Broker (single files)
+        storage_file_name = 'StorageBroker._s.Configurations.cs'
+        location = f'{destination}{app_name}.Api\\Brokers\\Storages\\'
+        copy_example_to_new_file(storage_file_name, location, example_assignment_name, new_assignment_name)
+    
         # Assignment Services
         example_dir_path_str = f'{destination}{app_name}.Api\\Services\\Foundations\\{example_assignment_name}s'
         copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_model_name)
@@ -264,7 +284,7 @@ def copy_and_alter_single_file(example_file_path, new_file_path, curr_example_mo
         with open(new_file_path, 'w') as file:
             file.write(content)
 
-        print(f'Created {new_file_path}')
+        print(f'Created {new_file_path}')    
                     
 def copy_example_to_new_file(fill_in_file_name, file_path, curr_example_model_name, curr_new_model_name):
     new_file_name = fill_in_file_name.replace('_', curr_new_model_name)
@@ -286,6 +306,10 @@ def copy_example_to_new_file(fill_in_file_name, file_path, curr_example_model_na
         # Replace content
         with open(new_file_path, 'r') as file: content = file.read()
 
+        # Remove Assignment from the name (if it exists) to fix any issues with missing replacements
+        curr_example_model_name = curr_example_model_name.replace('Assignment', '')
+        curr_new_model_name = curr_new_model_name.replace('Assignment', '')
+        
         # Replace all instances of the title case variable
         content = content.replace(curr_example_model_name, curr_new_model_name)
 
