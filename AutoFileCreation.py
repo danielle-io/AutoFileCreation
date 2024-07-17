@@ -57,7 +57,6 @@ def main():
     example_exceptions_location = f'{destination}{app_name}.Api\\Models\\Foundations\\{example_model_name}s\\Exceptions\\'
     copy_and_alter_dir_files(example_exceptions_location, example_model_name, new_model_name)
 
- 
     # TODO: alter the StorageBoker and IStorageBroker by adding Configure to OnModelCreating
     
     # IStorages (single files)
@@ -126,7 +125,11 @@ def main():
         copy_and_alter_dir_files(example_dir_path_str, example_assignment_name, new_assignment_name)
         
         if add_matching_assignment_coordination_files:
-            # Assignment Coordinations folder 
+            # Assignment Coordinations models folder 
+            example_coordination_service_path_str = f'{destination}{app_name}.Api\\Models\\Coordinations\\{example_assignment_name}s\\Exceptions\\'
+            copy_and_alter_dir_files(example_coordination_service_path_str, example_assignment_name, new_assignment_name)
+            
+            # Assignment Coordinations service folder 
             example_coordination_service_path_str = f'{destination}{app_name}.Api\\Services\\Coordinations\\{example_assignment_name}s\\'
             copy_and_alter_dir_files(example_coordination_service_path_str, example_assignment_name, new_assignment_name)
 
@@ -137,24 +140,17 @@ def main():
         if add_matching_assignment_orchestration_files:
             orchestration_example_assignment_name = f'{example_assignment_name}Detail'
             
-            # Assignment Orchestrations Models   
-            example_orchestration_service_path_str = f'{destination}{app_name}.Api\\Services\\Orchestrations\\{orchestration_example_assignment_name}s\\'
-            copy_and_alter_dir_files(example_orchestration_service_path_str, example_assignment_name, new_assignment_name)
+            # Assignment Orchestration Models folder 
+            example_coordination_service_path_str = f'{destination}{app_name}.Api\\Models\\Orchestrations\\{example_assignment_name}s\\'
+            copy_and_alter_dir_files(example_coordination_service_path_str, example_assignment_name, new_assignment_name)
             
-            # Assignment Orchestrations Exceptions folder  
-            # example_coordination_service_path_str = f'{destination}{app_name}.Api\\Services\\Orchestrations\\{orchestration_example_assignment_name}s\\Exceptions\\'
-            # copy_and_alter_dir_files(example_coordination_service_path_str, example_assignment_name, new_assignment_name)
+            # Assignment Orchestrations Model Exceptions folder   
+            example_orchestration_service_path_str = f'{destination}{app_name}.Api\\Services\\Orchestrations\\{orchestration_example_assignment_name}s\\Exceptions\\'
+            copy_and_alter_dir_files(example_orchestration_service_path_str, example_assignment_name, new_assignment_name)
             
             # Assignment Orchestrations Unit Tests
             example_dir_path_str = f'{destination}{app_name}.Api.Tests.Unit\\Services\\Orchestrations\\{orchestration_example_assignment_name}s'
             copy_and_alter_dir_files(example_dir_path_str, example_assignment_name, new_assignment_name)
-
-
-            
-    # TODO: copy each file in that folder and replace the model name with the new model name
-    # Acceptance Tests
-    # example_acceptance_tests = f'{destination}{app_name}.Api.Tests.Acceptance\APIs\\{example_model_name}'
-    
     
 # ------ End: Put each set of file names and locations here
 
@@ -163,29 +159,24 @@ def get_camel_case(word):
 
 def get_snake_case(word):
     return word[0].lower() + word[1:]
-
-    # The model is already made so this will just copy in the exceptions
-    copy_and_alter_dir_files(example_exceptions_location, model_file_name, new_model_name)
     
-
 # Works on service files for Coordinations, Foundations, or Orchestrations, on both the model and the modelAssignment (if applicable)
 def copy_and_alter_dir_files(example_dir_path_str, curr_example_model_name, curr_new_model_name):
-    new_service_directory_str = example_dir_path_str.replace(curr_example_model_name, curr_new_model_name)
+    new_directory_str = example_dir_path_str.replace(curr_example_model_name, curr_new_model_name)
 
     if is_mac == 'true':
-        new_service_directory_str = new_service_directory_str.replace('\\', '/')
+        new_directory_str = new_directory_str.replace('\\', '/')
         example_dir_path_str = example_dir_path_str.replace('\\', '/')
 
-    new_service_directory_path = Path(new_service_directory_str)
+    new_directory_path = Path(new_directory_str)
 
     # Check if the file already exists
-    if new_service_directory_path.is_file():
-        print(f'{new_service_directory_str} already exists, skipping')
+    if new_directory_path.is_file():
+        print(f'{new_directory_str} already exists, skipping')
     else:
         # Ensure parent directory exists before creating the file
-        new_service_directory_path.parent.mkdir(parents=True, exist_ok=True)
+        new_directory_path.parent.mkdir(parents=True, exist_ok=True)
     
-      
     example_directory = Path(example_dir_path_str)
 
     # Loop over files in the directory
