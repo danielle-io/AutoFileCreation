@@ -131,14 +131,14 @@ def main():
         location = f'{destination}{app_name}.Api\\Controllers\\'
         copy_example_to_new_file(controller_file_name, location, example_model_name, new_model_name)
         
-        # Acceptance Tests APIS
+        # Assignment Acceptance Tests APIS
         example_dir_path_str = f'{destination}{app_name}.Api.Tests.Acceptance\\APIs\\'
         copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_assignment_name)
         
-        # Acceptance Tests Brokers (single files)
+        # Assignment Acceptance Tests Brokers (single files)
         example_dir_path_str = f'{destination}{app_name}.Api.Tests.Acceptance\\Brokers\\'
-        broker_file_name = 'APIBroker._s.cs'
-        copy_example_to_new_file(broker_file_name, example_dir_path_str, example_model_name, new_assignment_name)
+        broker_file_name = 'ApiBroker._s.cs'
+        copy_example_to_new_file(broker_file_name, example_dir_path_str, example_assignment_name, new_assignment_name)
         
         # Unit Tests
         example_dir_path_str = f'{destination}{app_name}.Api.Tests.Unit\\Services\\Foundations\\{example_assignment_name}s'
