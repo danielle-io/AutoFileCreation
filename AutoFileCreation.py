@@ -133,7 +133,7 @@ def main():
         
         # Assignment Acceptance Tests APIS
         example_dir_path_str = f'{destination}{app_name}.Api.Tests.Acceptance\\APIs\\{example_assignment_name}s'
-        copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_assignment_name)
+        copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_model_name)
         
         # Assignment Acceptance Tests Brokers (single files)
         example_dir_path_str = f'{destination}{app_name}.Api.Tests.Acceptance\\Brokers\\'
