@@ -84,7 +84,7 @@ def main():
     copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_model_name)
     
     # Acceptance Tests APIs
-    example_dir_path_str = f'{destination}{app_name}.Api.Tests.Acceptance\\APIs\\'
+    example_dir_path_str = f'{destination}{app_name}.Api.Tests.Acceptance\\APIs\\{example_model_name}'
     copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_model_name)
     
     # Acceptance Tests Brokers (single files)
@@ -132,7 +132,7 @@ def main():
         copy_example_to_new_file(controller_file_name, location, example_model_name, new_model_name)
         
         # Assignment Acceptance Tests APIS
-        example_dir_path_str = f'{destination}{app_name}.Api.Tests.Acceptance\\APIs\\'
+        example_dir_path_str = f'{destination}{app_name}.Api.Tests.Acceptance\\APIs\\{example_assignment_name}'
         copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_assignment_name)
         
         # Assignment Acceptance Tests Brokers (single files)
