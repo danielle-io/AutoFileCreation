@@ -129,7 +129,7 @@ def main():
         # Assignment Controllers
         controller_file_name = '_sController.cs'
         location = f'{destination}{app_name}.Api\\Controllers\\'
-        copy_example_to_new_file(controller_file_name, location, example_model_name, new_model_name)
+        copy_example_to_new_file(controller_file_name, location, example_assignment_name, new_assignment_name)
         
         # Assignment Acceptance Tests APIS
         example_dir_path_str = f'{destination}{app_name}.Api.Tests.Acceptance\\APIs\\{example_assignment_name}s'
