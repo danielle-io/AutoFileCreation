@@ -18,5 +18,6 @@ namespace {app_name}.Api.Models.Foundations.{app_name}s
         public Guid UpdatedBy { get; set; }
         public Profile UpdatedByProfile { get; set; }
         public IEnumerable<{new_model_name}Assignment> {new_model_name}Assignments { get; set; }
+        public FormType FormType { get; private set; } = {new_formtype};
     }
 }

@@ -4,6 +4,7 @@ import shutil
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+import re
 
 # Load environment variables from .env file
 load_dotenv()
@@ -18,6 +19,13 @@ your_name = os.getenv('YOU_NAME')
 add_matching_assignment_model = os.getenv('ADD_MATCHING_ASSIGNMENT_MODEL')
 add_matching_assignment_orchestration_files = os.getenv('ADD_MATCHING_ASSIGNMENT_ORCHESTRATION_FILES')
 add_matching_assignment_coordination_files = os.getenv('ADD_MATCHING_ASSIGNMENT_COORDINATION_FILES')
+
+startup_file_path = f'{destination}{app_name}.Api\\Startup.cs'
+storage_broker_registration_path = f'{destination}{app_name}.Api\\Brokers\\Storages\\StorageBroker.cs'
+
+# This is specific to datawill and for other projects this + references to it can be removed
+example_formtype = os.getenv('EXAMPLE_FORMTYPE')
+new_formtype = os.getenv('NEW_FORMTYPE')
 
 missing_vars = []
 
@@ -51,13 +59,15 @@ def main():
     
     # Main model + other models in scope (i.e. ModelState, ModelStatus, etc.) (folder of files)
     example_location_str = f'{destination}{app_name}.Api\\Models\\Foundations\\{example_model_name}s\\'
-    copy_and_alter_dir_files(example_location_str, example_model_name, new_model_name)
+    new_directory_path = copy_and_alter_dir_files(example_location_str, example_model_name, new_model_name)
+
+    # This is specific to datawill and can be removed for other projects
+    # FOR DATAWILL ONLY: FormType needs to be updated in the model
+    alter_formtype_in_model(f'{new_directory_path}\\{new_model_name}.cs', example_formtype, new_formtype)
 
     # Model Exceptions (folder of files)
     example_exceptions_location = f'{destination}{app_name}.Api\\Models\\Foundations\\{example_model_name}s\\Exceptions\\'
     copy_and_alter_dir_files(example_exceptions_location, example_model_name, new_model_name)
-
-    # TODO: alter the StorageBoker and IStorageBroker by adding Configure to OnModelCreating
     
     # IStorageBrokers (single files)
     i_storage_file_name = 'IStorageBroker._s.cs'
@@ -74,6 +84,9 @@ def main():
     location = f'{destination}{app_name}.Api\\Brokers\\Storages\\'
     copy_example_to_new_file(storage_file_name, location, example_model_name, new_model_name)
     
+    # Register the model in the storage broker
+    register_model(storage_broker_registration_path, new_model_name)
+
     # Controllers (single files)
     controller_file_name = '_sController.cs'
     location = f'{destination}{app_name}.Api\\Controllers\\'
@@ -82,6 +95,9 @@ def main():
     # Services
     example_dir_path_str = f'{destination}{app_name}.Api\\Services\\Foundations\\{example_model_name}s'
     copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_model_name)
+    
+    # Register the new service
+    register_service(startup_file_path, new_model_name, "Foundation")
     
     # Acceptance Tests APIs
     example_dir_path_str = f'{destination}{app_name}.Api.Tests.Acceptance\\APIs\\{example_model_name}s'
@@ -121,10 +137,16 @@ def main():
         storage_file_name = 'StorageBroker._s.Configurations.cs'
         location = f'{destination}{app_name}.Api\\Brokers\\Storages\\'
         copy_example_to_new_file(storage_file_name, location, example_assignment_name, new_assignment_name)
+        
+        # Register the model in the storage broker
+        register_model(storage_broker_registration_path, new_assignment_name)
     
         # Assignment Services
         example_dir_path_str = f'{destination}{app_name}.Api\\Services\\Foundations\\{example_assignment_name}s'
         copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_model_name)
+        
+        # Register the new service
+        register_service(startup_file_path, new_assignment_name, 'Foundation')
         
         # Assignment Controllers
         controller_file_name = '_sController.cs'
@@ -153,12 +175,16 @@ def main():
             example_coordination_service_path_str = f'{destination}{app_name}.Api\\Services\\Coordinations\\{example_assignment_name}s\\'
             copy_and_alter_dir_files(example_coordination_service_path_str, example_model_name, new_model_name)
 
+            # Register the Assignment Coordinations service
+            register_service(startup_file_path, new_assignment_name, 'Coordination')
+        
             # Assignment Coordinations Unit Tests
             example_dir_path_str = f'{destination}{app_name}.Api.Tests.Unit\\Services\\Coordinations\\{example_assignment_name}s'
             copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_model_name)
             
         if add_matching_assignment_orchestration_files:
             orchestration_example_assignment_name = f'{example_assignment_name}Detail'
+            orchestration_new_assignment_name = f'{new_assignment_name}Detail'
             
             # Assignment Orchestration Models folder 
             example_coordination_service_path_str = f'{destination}{app_name}.Api\\Models\\Orchestrations\\{orchestration_example_assignment_name}s\\'
@@ -170,19 +196,142 @@ def main():
               
             # Assignment Orchestrations Service folder 
             example_coordination_service_path_str = f'{destination}{app_name}.Api\\Services\\Orchestrations\\{orchestration_example_assignment_name}s\\'
-            copy_and_alter_dir_files(example_coordination_service_path_str, example_model_name, new_model_name)
+            copy_and_alter_dir_files(example_coordination_service_path_str, example_model_name, new_model_name)   
+            
+            # Register the Assignment Orchestration service
+            register_service(startup_file_path, orchestration_new_assignment_name, 'Orchestration')
             
             # Assignment Orchestrations Unit Tests
             example_dir_path_str = f'{destination}{app_name}.Api.Tests.Unit\\Services\\Orchestrations\\{orchestration_example_assignment_name}s'
             copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_model_name)
     
 # ------ End: Put each set of file names and locations here
+            
+def register_model(storage_broker_path, new_model_name):
+    if is_mac == 'true':
+        storage_broker_path = storage_broker_path.replace('\\', '/')
+
+    new_directory_path = Path(storage_broker_path)
+
+    # Read content from the original file
+    with open(new_directory_path, 'r') as file:
+        content = file.read()
+
+    new_str = f"Configure{new_model_name}(modelBuilder);"
+    
+       # Find the function definition
+    function_pattern = r'(protected\s+override\s+void\s+OnModelCreating\(ModelBuilder\s+modelBuilder\)\s*\{)(.*?)(\})'
+    match = re.search(function_pattern, content, re.DOTALL)
+    
+    if not match:
+        raise ValueError("Function definition not found")
+    
+    # Extract the parts of the function
+    function_start = match.group(1)
+    function_body = match.group(2)
+    function_end = match.group(3)
+
+    # Check if the new string is already in the function body
+    if new_str in function_body:
+        print(f'The model {new_model_name} is already registered, skipping')
+        return
+    
+    # Add the new line to the function body
+    new_function_body = f'{function_body}\n\t\t\t{new_str}\n'
+    
+    # Reconstruct the function
+    new_function = function_start + new_function_body + function_end
+    
+    # Replace the old function with the new one in the content
+    new_content = content[:match.start()] + new_function + content[match.end():]
+    
+    # Write the modified content back to the file
+    with open(new_directory_path, 'w') as file:
+        file.write(new_content)
+        
+    print(f'Registered {new_model_name} model')
+    
+def register_service(startup_path, new_model_name, service_type):
+    if is_mac == 'true':
+        startup_path = startup_path.replace('\\', '/')
+
+    new_directory_path = Path(startup_path)
+
+    # Read content from the original file
+    with open(new_directory_path, 'r') as file:
+        content = file.read()
+
+    new_str = f'services.AddTransient<I{new_model_name}{service_type}Service, {new_model_name}{service_type}Service>();'
+    if service_type == "Foundation":
+        new_str = f'services.AddTransient<I{new_model_name}Service, {new_model_name}Service>();'
+
+    print(f'Adding service: {new_str}')
+
+    # Find the function definition for AddServices
+    function_pattern = r'(private\s+static\s+void\s+AddServices\(IServiceCollection\s+services\)\s*\{[^}]*\})'
+    match = re.search(function_pattern, content, re.DOTALL)
+    if not match:
+        raise ValueError("Function definition not found")
+
+    import_str = f'using {app_name}.Api.Services.{service_type}s.{new_model_name}s;\n'
+
+    # Check if the import is already in the file
+    if import_str not in content:
+        # Find the last import statement
+        import_pattern = r'using\s+.*?;\n'
+        last_import = re.findall(import_pattern, content)[-1] if re.findall(import_pattern, content) else ''
+        
+        # Add the new import statement after the last one
+        content = content.replace(last_import, last_import + import_str)
+    else:
+        print(f'The import for {new_model_name} is already in the startup file.')
+
+    # Extract the parts of the function
+    function_full = match.group(1)
+    function_minus_bracket = function_full[:-1]
+
+    # Check if the new string is already in the function body
+    if new_str in function_full:
+        print(f'The service for {new_model_name} is already registered, skipping')
+        return
+    
+    # Change the } to a newline with the new service and a }
+    function_end = f'\t{new_str}\n\t\t' + "}"
+
+    function_updated = function_minus_bracket + function_end
+    
+    # Replace the old function with the new one in the content
+    updated_content = content.replace(function_full, function_updated)
+
+    # Write the modified content back to the file
+    with open(new_directory_path, 'w') as file:
+        file.write(updated_content)
+
+    print(f'Added service configuration for {new_model_name}')
 
 def get_camel_case(word):
     return word[0].lower() + word[1:]
 
 def get_snake_case(word):
     return word[0].lower() + word[1:]
+
+def alter_formtype_in_model(new_model_path, example_formtype_name, curr_formtype_name):
+    if is_mac == 'true':
+        new_model_path = new_model_path.replace('\\', '/')
+
+    new_directory_path = Path(new_model_path)
+    
+     # Read content from the original file
+    with open(new_directory_path, 'r') as file:
+        content = file.read()
+
+    # Replace placeholders in the content
+    content = content.replace(example_formtype_name, curr_formtype_name)
+    
+    with open(new_directory_path, 'w') as file:
+            file.write(content)
+
+    print(f'Updated formtype to {new_model_path}')    
     
 # Works on service files for Coordinations, Foundations, or Orchestrations, on both the model and the modelAssignment (if applicable)
 def copy_and_alter_dir_files(example_dir_path_str, curr_example_model_name, curr_new_model_name):
@@ -214,6 +363,8 @@ def copy_and_alter_dir_files(example_dir_path_str, curr_example_model_name, curr
             # Create new file and change content to match new model
             copy_and_alter_single_file(example_path_str, new_file_path, curr_example_model_name, curr_new_model_name)
             
+    return new_directory_path
+            
 def create_basic_model(model_file_name, file_path_str, example_exceptions_location_str):
     # Add to empty file
     new_file_path_str = f'{file_path_str}{model_file_name}'
@@ -243,6 +394,7 @@ def create_basic_model(model_file_name, file_path_str, example_exceptions_locati
         template_content = template_content.replace('{your_name}', your_name)
         template_content = template_content.replace('{app_name}', app_name)
         template_content = template_content.replace('{new_model_name}', new_model_name)
+        template_content = template_content.replace('{new_formtype}', new_formtype)
 
         # Create the file (if it doesn't exist)
         if not new_file_path.exists():
