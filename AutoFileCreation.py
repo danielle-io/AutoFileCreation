@@ -2,6 +2,7 @@ from ctypes import Array
 from hmac import new
 import shutil
 import os
+from tkinter import N
 from dotenv import load_dotenv
 from pathlib import Path
 import re
@@ -11,6 +12,7 @@ load_dotenv()
 
 # Retrieve environment variables
 is_mac = os.getenv('IS_MAC')
+overwrite_files = os.getenv('OVERWRITE_FILES')
 example_model_name = os.getenv('EXAMPLE_MODEL_NAME')
 new_model_name = os.getenv('NEW_MODEL_NAME')
 app_name = os.getenv('APP_NAME')
@@ -31,6 +33,12 @@ missing_vars = []
 
 if not is_mac:
     missing_vars.append('IS_MAC')
+if (is_mac != 'True' and is_mac != 'False'):
+    raise ValueError('IS_MAC must be set to True or False')
+if not overwrite_files:
+    missing_vars.append('OVERWRITE_FILES')
+if (overwrite_files != 'True' and overwrite_files != 'False'):
+    raise ValueError('OVERWRITE_FILES must be set to True or False')
 if not example_model_name:
     missing_vars.append('EXAMPLE_MODEL_NAME')
 if not new_model_name:
@@ -43,10 +51,16 @@ if not your_name:
     missing_vars.append('YOUR_NAME')
 if not add_matching_assignment_model:
     missing_vars.append('ADD_MATCHING_ASSIGNMENT_MODEL')
+if (add_matching_assignment_model != 'True' and add_matching_assignment_model != 'False'):
+    raise ValueError('ADD_MATCHING_ASSIGNMENT_MODEL must be set to True or False')
 if not add_matching_assignment_model:
     missing_vars.append('ADD_MATCHING_ASSIGNMENT_ORCHESTRATION_FILES')
-if not add_matching_assignment_model:
+if (add_matching_assignment_orchestration_files != 'True' and add_matching_assignment_orchestration_files != 'False'):
+    raise ValueError('ADD_MATCHING_ASSIGNMENT_ORCHESTRATION_FILES must be set to True or False')
+if not add_matching_assignment_coordination_files:
     missing_vars.append('ADD_MATCHING_ASSIGNMENT_COORDINATION_FILES')
+if (add_matching_assignment_coordination_files != 'True' and add_matching_assignment_coordination_files != 'False'):
+    raise ValueError('ADD_MATCHING_ASSIGNMENT_COORDINATION_FILES must be set to True or False')
 
 if missing_vars != []:
     print(f'Missing environment variables: {", ".join(missing_vars)}')
@@ -54,8 +68,6 @@ if missing_vars != []:
 
 def main():
     # ------ Start: Put each set of file names and locations here
-    # TODO: add back the below line for when making a new model
-    # model_file_name = f'{new_model_name}.cs'
     
     # Main model + other models in scope (i.e. ModelState, ModelStatus, etc.) (folder of files)
     example_location_str = f'{destination}{app_name}.Api\\Models\\Foundations\\{example_model_name}s\\'
@@ -208,7 +220,7 @@ def main():
 # ------ End: Put each set of file names and locations here
             
 def register_model(storage_broker_path, new_model_name):
-    if is_mac == 'true':
+    if is_mac == 'True':
         storage_broker_path = storage_broker_path.replace('\\', '/')
 
     new_directory_path = Path(storage_broker_path)
@@ -252,7 +264,7 @@ def register_model(storage_broker_path, new_model_name):
     print(f'Registered {new_model_name} model')
     
 def register_service(startup_path, new_model_name, service_type):
-    if is_mac == 'true':
+    if is_mac == 'True':
         startup_path = startup_path.replace('\\', '/')
 
     new_directory_path = Path(startup_path)
@@ -316,7 +328,7 @@ def get_snake_case(word):
     return word[0].lower() + word[1:]
 
 def alter_formtype_in_model(new_model_path, example_formtype_name, curr_formtype_name):
-    if is_mac == 'true':
+    if is_mac == 'True':
         new_model_path = new_model_path.replace('\\', '/')
 
     new_directory_path = Path(new_model_path)
@@ -337,7 +349,7 @@ def alter_formtype_in_model(new_model_path, example_formtype_name, curr_formtype
 def copy_and_alter_dir_files(example_dir_path_str, curr_example_model_name, curr_new_model_name):
     new_directory_str = example_dir_path_str.replace(curr_example_model_name, curr_new_model_name)
 
-    if is_mac == 'true':
+    if is_mac == 'True':
         new_directory_str = new_directory_str.replace('\\', '/')
         example_dir_path_str = example_dir_path_str.replace('\\', '/')
 
@@ -370,7 +382,7 @@ def create_basic_model(model_file_name, file_path_str, example_exceptions_locati
     new_file_path_str = f'{file_path_str}{model_file_name}'
     new_exceptions_directory_str = example_exceptions_location_str.replace(example_model_name, new_model_name)
 
-    if is_mac == 'true':
+    if is_mac == 'True':
         new_file_path_str = new_file_path_str.replace('\\', '/')
         example_exceptions_location_str = example_exceptions_location_str.replace('\\', '/')
         new_exceptions_directory_str = new_exceptions_directory_str.replace('\\', '/')
@@ -379,69 +391,85 @@ def create_basic_model(model_file_name, file_path_str, example_exceptions_locati
 
     # Check if the file already exists
     if new_file_path.is_file():
-        print(f'{new_file_path_str} already exists, skipping')
-    else:
-        # Ensure parent directory exists before creating the file
-        new_file_path.parent.mkdir(parents=True, exist_ok=True)
-    
-        # Create the file using the ModelTemplate.txt file
-        template_file = os.path.join(os.path.dirname(__file__), 'ModelTemplate.txt')
-
-        with open(template_file, 'r') as file:
-            template_content = file.read()
-        
-        # Replace placeholders in the content
-        template_content = template_content.replace('{your_name}', your_name)
-        template_content = template_content.replace('{app_name}', app_name)
-        template_content = template_content.replace('{new_model_name}', new_model_name)
-        template_content = template_content.replace('{new_formtype}', new_formtype)
-
-        # Create the file (if it doesn't exist)
-        if not new_file_path.exists():
-            with open(new_file_path, 'w') as file:
-                # Optionally, write initial content to the file
-                file.write(template_content)
-
-            print(f'{new_file_path_str} created successfully')
-        else:
-            print(f'{new_file_path_str} already exists, skipping')
+        if (overwrite_files == 'False'):
+            print(f'{new_file_path} already exists, skipping')
             
-        print(f'Created {new_file_path_str}')
+        return
+    
+    else:
+        print(f'{new_file_path} already exists, overwriting')
+
+    # Ensure parent directory exists before creating the file
+    new_file_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Create the file using the ModelTemplate.txt file
+    template_file = os.path.join(os.path.dirname(__file__), 'ModelTemplate.txt')
+
+    with open(template_file, 'r') as file:
+        template_content = file.read()
+        
+    # Replace placeholders in the content
+    template_content = template_content.replace('{your_name}', your_name)
+    template_content = template_content.replace('{app_name}', app_name)
+    template_content = template_content.replace('{new_model_name}', new_model_name)
+    template_content = template_content.replace('{new_formtype}', new_formtype)
+
+    # Create the file (if it doesn't exist)
+    if not new_file_path.exists():
+        with open(new_file_path, 'w') as file:
+            # Optionally, write initial content to the file
+            file.write(template_content)
+
+        print(f'{new_file_path_str} created successfully')
+    else:
+        print(f'{new_file_path_str} already exists, skipping')
+            
+    print(f'Created {new_file_path_str}')
                 
 def copy_and_alter_single_file(example_file_path, new_file_path, curr_example_model_name, curr_new_model_name):
-    if is_mac == 'true':
+    if is_mac == 'True':
         example_file_path = example_file_path.as_posix()
         new_file_path = new_file_path.as_posix()
 
-    if new_file_path.is_file():
-        print(f'{new_file_path} already exists, skipping')
-    else:
-        # Ensure parent directory exists before copying the file
-        new_file_path.parent.mkdir(parents=True, exist_ok=True)
+    if new_file_path.is_file():        
+        if (overwrite_files == 'False'):
+            print(f'{new_file_path} already exists, skipping')
+            
+            return
+        # Do not overwrite an existing main model file
+        elif (new_file_path == f'{destination}{app_name}.Api\\Models\\Foundations\\{new_model_name}s\\'):
+            print('Main model file already exists, skipping')
+            
+            return
+        else:
+            print(f'{new_file_path} already exists, overwriting')
+
+    # Ensure parent directory exists before copying the file
+    new_file_path.parent.mkdir(parents=True, exist_ok=True)
         
-        # Copy file
-        shutil.copyfile(example_file_path, new_file_path)
+    # Copy file
+    shutil.copyfile(example_file_path, new_file_path)
 
-        # Read content from the original file
-        with open(new_file_path, 'r') as file:
-            content = file.read()
+    # Read content from the original file
+    with open(new_file_path, 'r') as file:
+        content = file.read()
 
-        # Replace placeholders in the content
-        content = content.replace(curr_example_model_name, curr_new_model_name)
-        example_camel_case_name = get_camel_case(curr_example_model_name)
-        new_camel_case_name = get_camel_case(curr_new_model_name)
-        content = content.replace(example_camel_case_name, new_camel_case_name)
+    # Replace placeholders in the content
+    content = content.replace(curr_example_model_name, curr_new_model_name)
+    example_camel_case_name = get_camel_case(curr_example_model_name)
+    new_camel_case_name = get_camel_case(curr_new_model_name)
+    content = content.replace(example_camel_case_name, new_camel_case_name)
 
-        # Write modified content back to the new file
-        with open(new_file_path, 'w') as file:
-            file.write(content)
+    # Write modified content back to the new file
+    with open(new_file_path, 'w') as file:
+        file.write(content)
 
-        print(f'Created {new_file_path}')    
+    print(f'Created {new_file_path}')    
                     
 def copy_example_to_new_file(fill_in_file_name, file_path, curr_example_model_name, curr_new_model_name):
     new_file_name = fill_in_file_name.replace('_', curr_new_model_name)
     
-    if is_mac == 'true':
+    if is_mac == 'True':
         file_path = file_path.replace('\\', '/')
 
     example_item_file_name = fill_in_file_name.replace('_', curr_example_model_name)
@@ -450,28 +478,32 @@ def copy_example_to_new_file(fill_in_file_name, file_path, curr_example_model_na
     copied_file_path = Path(new_file_path)
     
     if copied_file_path.is_file():
-        print(f'{new_file_path} already exists, skipping')
+        if (overwrite_files == 'False'):
+            print(f'{new_file_path} already exists, skipping')
+                        
+            return
+        else:
+            print(f'{new_file_path} already exists, overwriting')
+       
+    shutil.copyfile(f'{file_path}{example_item_file_name}', new_file_path)
+
+    # Replace content
+    with open(new_file_path, 'r') as file: content = file.read()
+
+    # Remove Assignment from the name (if it exists) to fix any issues with missing replacements
+    curr_example_model_name = curr_example_model_name.replace('Assignment', '')
+    curr_new_model_name = curr_new_model_name.replace('Assignment', '')
         
-    else:
-        shutil.copyfile(f'{file_path}{example_item_file_name}', new_file_path)
+    # Replace all instances of the title case variable
+    content = content.replace(curr_example_model_name, curr_new_model_name)
 
-        # Replace content
-        with open(new_file_path, 'r') as file: content = file.read()
-
-        # Remove Assignment from the name (if it exists) to fix any issues with missing replacements
-        curr_example_model_name = curr_example_model_name.replace('Assignment', '')
-        curr_new_model_name = curr_new_model_name.replace('Assignment', '')
-        
-        # Replace all instances of the title case variable
-        content = content.replace(curr_example_model_name, curr_new_model_name)
-
-        # Replace all instances of the camelCase variable
-        example_camel_case_name = get_camel_case(curr_example_model_name)
-        new_camel_case_name = get_camel_case(curr_new_model_name)
-        content = content.replace(example_camel_case_name, new_camel_case_name)
-        # Write the modified content back to the file
-        with open(new_file_path, 'w') as file: file.write(content)
-        print(f'Created {new_file_path}')
+    # Replace all instances of the camelCase variable
+    example_camel_case_name = get_camel_case(curr_example_model_name)
+    new_camel_case_name = get_camel_case(curr_new_model_name)
+    content = content.replace(example_camel_case_name, new_camel_case_name)
+    # Write the modified content back to the file
+    with open(new_file_path, 'w') as file: file.write(content)
+    print(f'Created {new_file_path}')
 
 if __name__ == "__main__":
     main()

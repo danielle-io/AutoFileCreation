@@ -59,6 +59,7 @@ Instructions
 1. Create a .env with the following (add your values & if running on a Mac, set IS_MAC=True):
 
 	IS_MAC=False
+    OVERWRITE_FILES=False
     ADD_MATCHING_ASSIGNMENT_FILES=True
     ADD_MATCHING_ASSIGNMENT_ORCHESTRATION_FILES=True
     ADD_MATCHING_ASSIGNMENT_COORDINATION_FILES=True
