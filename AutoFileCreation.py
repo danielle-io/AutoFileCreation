@@ -221,7 +221,7 @@ def main():
             
 def register_model(storage_broker_path, new_model_name):
     if is_mac == 'True':
-        storage_broker_path = storage_broker_path.replace('\\', '/')
+        storage_broker_path = storage_broker_path.as_posix()
 
     new_directory_path = Path(storage_broker_path)
 
@@ -265,8 +265,8 @@ def register_model(storage_broker_path, new_model_name):
     
 def register_service(startup_path, new_model_name, service_type):
     if is_mac == 'True':
-        startup_path = startup_path.replace('\\', '/')
-
+        startup_path = startup_path.as_posix()
+        
     new_directory_path = Path(startup_path)
 
     # Read content from the original file
@@ -329,7 +329,7 @@ def get_snake_case(word):
 
 def alter_formtype_in_model(new_model_path, example_formtype_name, curr_formtype_name):
     if is_mac == 'True':
-        new_model_path = new_model_path.replace('\\', '/')
+        new_model_path = new_model_path.as_posix()
 
     new_directory_path = Path(new_model_path)
     
@@ -350,8 +350,8 @@ def copy_and_alter_dir_files(example_dir_path_str, curr_example_model_name, curr
     new_directory_str = example_dir_path_str.replace(curr_example_model_name, curr_new_model_name)
 
     if is_mac == 'True':
-        new_directory_str = new_directory_str.replace('\\', '/')
-        example_dir_path_str = example_dir_path_str.replace('\\', '/')
+        new_directory_str = new_directory_str.as_posix()
+        example_dir_path_str = example_dir_path_str.as_posix()
 
     new_directory_path = Path(new_directory_str)
 
@@ -383,9 +383,9 @@ def create_basic_model(model_file_name, file_path_str, example_exceptions_locati
     new_exceptions_directory_str = example_exceptions_location_str.replace(example_model_name, new_model_name)
 
     if is_mac == 'True':
-        new_file_path_str = new_file_path_str.replace('\\', '/')
-        example_exceptions_location_str = example_exceptions_location_str.replace('\\', '/')
-        new_exceptions_directory_str = new_exceptions_directory_str.replace('\\', '/')
+        new_file_path_str = new_file_path_str.as_posix()
+        example_exceptions_location_str = example_exceptions_location_str.as_posix()
+        new_exceptions_directory_str = new_exceptions_directory_str.as_posix()
 
     new_file_path = Path(new_file_path_str)
 
@@ -427,9 +427,12 @@ def create_basic_model(model_file_name, file_path_str, example_exceptions_locati
     print(f'Created {new_file_path_str}')
                 
 def copy_and_alter_single_file(example_file_path, new_file_path, curr_example_model_name, curr_new_model_name):
+    main_model_path =  f'{destination}{app_name}.Api\\Models\\Foundations\\{new_model_name}s\\'
+    
     if is_mac == 'True':
         example_file_path = example_file_path.as_posix()
         new_file_path = new_file_path.as_posix()
+        main_model_path = main_model_path.as_posix()
 
     if new_file_path.is_file():        
         if (overwrite_files == 'False'):
@@ -437,7 +440,7 @@ def copy_and_alter_single_file(example_file_path, new_file_path, curr_example_mo
             
             return
         # Do not overwrite an existing main model file
-        elif (new_file_path == f'{destination}{app_name}.Api\\Models\\Foundations\\{new_model_name}s\\'):
+        elif (new_file_path == main_model_path):
             print('Main model file already exists, skipping')
             
             return
@@ -470,7 +473,7 @@ def copy_example_to_new_file(fill_in_file_name, file_path, curr_example_model_na
     new_file_name = fill_in_file_name.replace('_', curr_new_model_name)
     
     if is_mac == 'True':
-        file_path = file_path.replace('\\', '/')
+        file_path = file_path.as_posix()
 
     example_item_file_name = fill_in_file_name.replace('_', curr_example_model_name)
     new_file_path = f'{file_path}{new_file_name}'
