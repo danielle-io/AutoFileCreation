@@ -427,7 +427,7 @@ def create_basic_model(model_file_name, file_path_str, example_exceptions_locati
     print(f'Created {new_file_path_str}')
                 
 def copy_and_alter_single_file(example_file_path, new_file_path, curr_example_model_name, curr_new_model_name):
-    main_model_path =  f'{destination}{app_name}.Api\\Models\\Foundations\\{new_model_name}s\\'
+    main_model_path =  Path(f'{destination}{app_name}.Api\\Models\\Foundations\\{new_model_name}s\\{new_model_name}.cs')
     
     if is_mac == 'True':
         example_file_path = example_file_path.as_posix()
@@ -439,8 +439,9 @@ def copy_and_alter_single_file(example_file_path, new_file_path, curr_example_mo
             print(f'{new_file_path} already exists, skipping')
             
             return
+        
         # Do not overwrite an existing main model file
-        elif (new_file_path == main_model_path):
+        elif (str(main_model_path) in str(new_file_path)):
             print('Main model file already exists, skipping')
             
             return
