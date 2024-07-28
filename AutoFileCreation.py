@@ -17,17 +17,12 @@ example_model_name = os.getenv('EXAMPLE_MODEL_NAME')
 new_model_name = os.getenv('NEW_MODEL_NAME')
 app_name = os.getenv('APP_NAME')
 destination = os.getenv('ROOT_FOLDER')
-your_name = os.getenv('YOU_NAME')
 add_matching_assignment_model = os.getenv('ADD_MATCHING_ASSIGNMENT_MODEL')
 add_matching_assignment_orchestration_files = os.getenv('ADD_MATCHING_ASSIGNMENT_ORCHESTRATION_FILES')
 add_matching_assignment_coordination_files = os.getenv('ADD_MATCHING_ASSIGNMENT_COORDINATION_FILES')
 
 startup_file_path = f'{destination}{app_name}.Api\\Startup.cs'
 storage_broker_registration_path = f'{destination}{app_name}.Api\\Brokers\\Storages\\StorageBroker.cs'
-
-# This is specific to datawill and for other projects this + references to it can be removed
-example_formtype = os.getenv('EXAMPLE_FORMTYPE')
-new_formtype = os.getenv('NEW_FORMTYPE')
 
 missing_vars = []
 
@@ -47,8 +42,6 @@ if not app_name:
     missing_vars.append('APP_NAME')
 if not destination:
     missing_vars.append('ROOT_FOLDER')
-if not your_name:
-    missing_vars.append('YOUR_NAME')
 if not add_matching_assignment_model:
     missing_vars.append('ADD_MATCHING_ASSIGNMENT_MODEL')
 if (add_matching_assignment_model != 'True' and add_matching_assignment_model != 'False'):
@@ -72,10 +65,6 @@ def main():
     # Main model + other models in scope (i.e. ModelState, ModelStatus, etc.) (folder of files)
     example_location_str = f'{destination}{app_name}.Api\\Models\\Foundations\\{example_model_name}s\\'
     new_directory_path = copy_and_alter_dir_files(example_location_str, example_model_name, new_model_name)
-
-    # This is specific to datawill and can be removed for other projects
-    # FOR DATAWILL ONLY: FormType needs to be updated in the model
-    alter_formtype_in_model(f'{new_directory_path}\\{new_model_name}.cs', example_formtype, new_formtype)
 
     # Model Exceptions (folder of files)
     example_exceptions_location = f'{destination}{app_name}.Api\\Models\\Foundations\\{example_model_name}s\\Exceptions\\'
@@ -326,24 +315,6 @@ def get_camel_case(word):
 
 def get_snake_case(word):
     return word[0].lower() + word[1:]
-
-def alter_formtype_in_model(new_model_path, example_formtype_name, curr_formtype_name):
-    if is_mac == 'True':
-        new_model_path = new_model_path.as_posix()
-
-    new_directory_path = Path(new_model_path)
-    
-     # Read content from the original file
-    with open(new_directory_path, 'r') as file:
-        content = file.read()
-
-    # Replace placeholders in the content
-    content = content.replace(example_formtype_name, curr_formtype_name)
-    
-    with open(new_directory_path, 'w') as file:
-            file.write(content)
-
-    print(f'Updated formtype to {new_model_path}')    
     
 # Works on service files for Coordinations, Foundations, or Orchestrations, on both the model and the modelAssignment (if applicable)
 def copy_and_alter_dir_files(example_dir_path_str, curr_example_model_name, curr_new_model_name):
@@ -375,56 +346,7 @@ def copy_and_alter_dir_files(example_dir_path_str, curr_example_model_name, curr
             # Create new file and change content to match new model
             copy_and_alter_single_file(example_path_str, new_file_path, curr_example_model_name, curr_new_model_name)
             
-    return new_directory_path
-            
-def create_basic_model(model_file_name, file_path_str, example_exceptions_location_str):
-    # Add to empty file
-    new_file_path_str = f'{file_path_str}{model_file_name}'
-    new_exceptions_directory_str = example_exceptions_location_str.replace(example_model_name, new_model_name)
-
-    if is_mac == 'True':
-        new_file_path_str = new_file_path_str.as_posix()
-        example_exceptions_location_str = example_exceptions_location_str.as_posix()
-        new_exceptions_directory_str = new_exceptions_directory_str.as_posix()
-
-    new_file_path = Path(new_file_path_str)
-
-    # Check if the file already exists
-    if new_file_path.is_file():
-        if (overwrite_files == 'False'):
-            print(f'{new_file_path} already exists, skipping')
-            
-        return
-    
-    else:
-        print(f'{new_file_path} already exists, overwriting')
-
-    # Ensure parent directory exists before creating the file
-    new_file_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    # Create the file using the ModelTemplate.txt file
-    template_file = os.path.join(os.path.dirname(__file__), 'ModelTemplate.txt')
-
-    with open(template_file, 'r') as file:
-        template_content = file.read()
-        
-    # Replace placeholders in the content
-    template_content = template_content.replace('{your_name}', your_name)
-    template_content = template_content.replace('{app_name}', app_name)
-    template_content = template_content.replace('{new_model_name}', new_model_name)
-    template_content = template_content.replace('{new_formtype}', new_formtype)
-
-    # Create the file (if it doesn't exist)
-    if not new_file_path.exists():
-        with open(new_file_path, 'w') as file:
-            # Optionally, write initial content to the file
-            file.write(template_content)
-
-        print(f'{new_file_path_str} created successfully')
-    else:
-        print(f'{new_file_path_str} already exists, skipping')
-            
-    print(f'Created {new_file_path_str}')
+    return new_directory_path 
                 
 def copy_and_alter_single_file(example_file_path, new_file_path, curr_example_model_name, curr_new_model_name):
     main_model_path =  Path(f'{destination}{app_name}.Api\\Models\\Foundations\\{new_model_name}s\\{new_model_name}.cs')
