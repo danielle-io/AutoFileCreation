@@ -312,9 +312,6 @@ def register_service(startup_path, new_model_name, service_type):
 
 def get_camel_case(word):
     return word[0].lower() + word[1:]
-
-def get_snake_case(word):
-    return word[0].lower() + word[1:]
     
 # Works on service files for Coordinations, Foundations, or Orchestrations, on both the model and the modelAssignment (if applicable)
 def copy_and_alter_dir_files(example_dir_path_str, curr_example_model_name, curr_new_model_name):
