@@ -379,15 +379,14 @@ def copy_and_alter_single_file(example_file_path_str, new_file_path, curr_exampl
                     
 def copy_example_to_new_file(fill_in_file_name, file_path, curr_example_model_name, curr_new_model_name):
     new_file_name = fill_in_file_name.replace('_', curr_new_model_name)
-    
-    if is_mac :
-        file_path = file_path.replace('\\', '/')
+    new_file_path = f'{file_path}{new_file_name}'
+    copied_file_path = Path(new_file_path)
+
+    if is_mac:
+        copied_file_path = Path(copied_file_path.as_posix())
 
     example_item_file_name = fill_in_file_name.replace('_', curr_example_model_name)
-    new_file_path = f'{file_path}{new_file_name}'
 
-    copied_file_path = Path(new_file_path)
-    
     if copied_file_path.is_file():
         if not overwrite_files:
             print(f'{new_file_path} already exists, skipping')
