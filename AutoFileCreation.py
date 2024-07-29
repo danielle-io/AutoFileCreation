@@ -7,53 +7,41 @@ from dotenv import load_dotenv
 from pathlib import Path
 import re
 
+def str_to_bool(value, field_name):
+    if value == 'True':
+        return True
+    elif value == 'False':
+        return False
+    else:
+        raise ValueError(f"Modify your .env file to contain True or False for boolean type: {field_name}, current value is {value}")
+   
 # Load environment variables from .env file
 load_dotenv()
 
 # Retrieve environment variables
-is_mac = os.getenv('IS_MAC')
-overwrite_files = os.getenv('OVERWRITE_FILES')
+is_mac = str_to_bool(os.getenv('IS_MAC'), 'IS_MAC')
+overwrite_files = str_to_bool(os.getenv('OVERWRITE_FILES'), 'OVERWRITE_FILES')
 example_model_name = os.getenv('EXAMPLE_MODEL_NAME')
 new_model_name = os.getenv('NEW_MODEL_NAME')
 app_name = os.getenv('APP_NAME')
 destination = os.getenv('ROOT_FOLDER')
-add_matching_assignment_model = os.getenv('ADD_MATCHING_ASSIGNMENT_MODEL')
-add_matching_assignment_orchestration_files = os.getenv('ADD_MATCHING_ASSIGNMENT_ORCHESTRATION_FILES')
-add_matching_assignment_coordination_files = os.getenv('ADD_MATCHING_ASSIGNMENT_COORDINATION_FILES')
+add_matching_assignment_model = str_to_bool(os.getenv('ADD_MATCHING_ASSIGNMENT_MODEL'), 'ADD_MATCHING_ASSIGNMENT_MODEL')
+add_matching_assignment_orchestration_files = str_to_bool(os.getenv('ADD_MATCHING_ASSIGNMENT_ORCHESTRATION_FILES'), 'ADD_MATCHING_ASSIGNMENT_ORCHESTRATION_FILES')
+add_matching_assignment_coordination_files = str_to_bool(os.getenv('ADD_MATCHING_ASSIGNMENT_COORDINATION_FILES'), 'ADD_MATCHING_ASSIGNMENT_COORDINATION_FILES')
 
 startup_file_path = f'{destination}{app_name}.Api\\Startup.cs'
-storage_broker_registration_path = f'{destination}{app_name}.Api\\Brokers\\Storages\\StorageBroker.cs'
+storage_broker_registration_path_str = f'{destination}{app_name}.Api\\Brokers\\Storages\\StorageBroker.cs'
 
 missing_vars = []
 
-if not is_mac:
-    missing_vars.append('IS_MAC')
-if (is_mac != 'True' and is_mac != 'False'):
-    raise ValueError('IS_MAC must be set to True or False')
-if not overwrite_files:
-    missing_vars.append('OVERWRITE_FILES')
-if (overwrite_files != 'True' and overwrite_files != 'False'):
-    raise ValueError('OVERWRITE_FILES must be set to True or False')
 if not example_model_name:
     missing_vars.append('EXAMPLE_MODEL_NAME')
 if not new_model_name:
     missing_vars.append('NEW_MODEL_NAME')
-if not app_name:
-    missing_vars.append('APP_NAME')
 if not destination:
     missing_vars.append('ROOT_FOLDER')
-if not add_matching_assignment_model:
-    missing_vars.append('ADD_MATCHING_ASSIGNMENT_MODEL')
-if (add_matching_assignment_model != 'True' and add_matching_assignment_model != 'False'):
-    raise ValueError('ADD_MATCHING_ASSIGNMENT_MODEL must be set to True or False')
-if not add_matching_assignment_model:
-    missing_vars.append('ADD_MATCHING_ASSIGNMENT_ORCHESTRATION_FILES')
-if (add_matching_assignment_orchestration_files != 'True' and add_matching_assignment_orchestration_files != 'False'):
-    raise ValueError('ADD_MATCHING_ASSIGNMENT_ORCHESTRATION_FILES must be set to True or False')
-if not add_matching_assignment_coordination_files:
-    missing_vars.append('ADD_MATCHING_ASSIGNMENT_COORDINATION_FILES')
-if (add_matching_assignment_coordination_files != 'True' and add_matching_assignment_coordination_files != 'False'):
-    raise ValueError('ADD_MATCHING_ASSIGNMENT_COORDINATION_FILES must be set to True or False')
+if not app_name:
+    missing_vars.append('APP_NAME')
 
 if missing_vars != []:
     print(f'Missing environment variables: {", ".join(missing_vars)}')
@@ -86,7 +74,7 @@ def main():
     copy_example_to_new_file(storage_file_name, location, example_model_name, new_model_name)
     
     # Register the model in the storage broker
-    register_model(storage_broker_registration_path, new_model_name)
+    register_model(storage_broker_registration_path_str, new_model_name)
 
     # Controllers (single files)
     controller_file_name = '_sController.cs'
@@ -140,7 +128,7 @@ def main():
         copy_example_to_new_file(storage_file_name, location, example_assignment_name, new_assignment_name)
         
         # Register the model in the storage broker
-        register_model(storage_broker_registration_path, new_assignment_name)
+        register_model(storage_broker_registration_path_str, new_assignment_name)
     
         # Assignment Services
         example_dir_path_str = f'{destination}{app_name}.Api\\Services\\Foundations\\{example_assignment_name}s'
@@ -207,12 +195,12 @@ def main():
             copy_and_alter_dir_files(example_dir_path_str, example_model_name, new_model_name)
     
 # ------ End: Put each set of file names and locations here
-            
-def register_model(storage_broker_path, new_model_name):
-    if is_mac == 'True':
-        storage_broker_path = storage_broker_path.as_posix()
 
-    new_directory_path = Path(storage_broker_path)
+def register_model(storage_broker_path_str, new_model_name):
+    new_directory_path = Path(storage_broker_path_str)
+    
+    if is_mac :
+        storage_broker_path_str = Path(new_directory_path.as_posix())
 
     # Read content from the original file
     with open(new_directory_path, 'r') as file:
@@ -253,11 +241,11 @@ def register_model(storage_broker_path, new_model_name):
     print(f'Registered {new_model_name} model')
     
 def register_service(startup_path, new_model_name, service_type):
-    if is_mac == 'True':
-        startup_path = startup_path.as_posix()
-        
     new_directory_path = Path(startup_path)
 
+    if is_mac :
+        new_directory_path = Path(new_directory_path.as_posix())
+        
     # Read content from the original file
     with open(new_directory_path, 'r') as file:
         content = file.read()
@@ -317,11 +305,12 @@ def get_camel_case(word):
 def copy_and_alter_dir_files(example_dir_path_str, curr_example_model_name, curr_new_model_name):
     new_directory_str = example_dir_path_str.replace(curr_example_model_name, curr_new_model_name)
 
-    if is_mac == 'True':
-        new_directory_str = new_directory_str.as_posix()
-        example_dir_path_str = example_dir_path_str.as_posix()
-
     new_directory_path = Path(new_directory_str)
+    example_directory = Path(example_dir_path_str)
+
+    if is_mac :
+        new_directory_path = Path(new_directory_path.as_posix())
+        example_directory = Path(example_directory.as_posix())
 
     # Check if the file already exists
     if new_directory_path.is_file():
@@ -330,7 +319,6 @@ def copy_and_alter_dir_files(example_dir_path_str, curr_example_model_name, curr
         # Ensure parent directory exists before creating the file
         new_directory_path.parent.mkdir(parents=True, exist_ok=True)
     
-    example_directory = Path(example_dir_path_str)
 
     # Loop over files in the directory
     for example_path in example_directory.iterdir():
@@ -345,16 +333,16 @@ def copy_and_alter_dir_files(example_dir_path_str, curr_example_model_name, curr
             
     return new_directory_path 
                 
-def copy_and_alter_single_file(example_file_path, new_file_path, curr_example_model_name, curr_new_model_name):
+def copy_and_alter_single_file(example_file_path_str, new_file_path, curr_example_model_name, curr_new_model_name):
     main_model_path =  Path(f'{destination}{app_name}.Api\\Models\\Foundations\\{new_model_name}s\\{new_model_name}.cs')
     
-    if is_mac == 'True':
-        example_file_path = example_file_path.as_posix()
-        new_file_path = new_file_path.as_posix()
-        main_model_path = main_model_path.as_posix()
+    if is_mac :
+        example_file_path_str = example_file_path_str.replace('\\', '/')
+        new_file_path = Path(new_file_path.as_posix())
+        main_model_path = Path(main_model_path.as_posix())
 
     if new_file_path.is_file():        
-        if (overwrite_files == 'False'):
+        if not overwrite_files:
             print(f'{new_file_path} already exists, skipping')
             
             return
@@ -371,7 +359,7 @@ def copy_and_alter_single_file(example_file_path, new_file_path, curr_example_mo
     new_file_path.parent.mkdir(parents=True, exist_ok=True)
         
     # Copy file
-    shutil.copyfile(example_file_path, new_file_path)
+    shutil.copyfile(example_file_path_str, new_file_path)
 
     # Read content from the original file
     with open(new_file_path, 'r') as file:
@@ -392,8 +380,8 @@ def copy_and_alter_single_file(example_file_path, new_file_path, curr_example_mo
 def copy_example_to_new_file(fill_in_file_name, file_path, curr_example_model_name, curr_new_model_name):
     new_file_name = fill_in_file_name.replace('_', curr_new_model_name)
     
-    if is_mac == 'True':
-        file_path = file_path.as_posix()
+    if is_mac :
+        file_path = file_path.replace('\\', '/')
 
     example_item_file_name = fill_in_file_name.replace('_', curr_example_model_name)
     new_file_path = f'{file_path}{new_file_name}'
@@ -401,7 +389,7 @@ def copy_example_to_new_file(fill_in_file_name, file_path, curr_example_model_na
     copied_file_path = Path(new_file_path)
     
     if copied_file_path.is_file():
-        if (overwrite_files == 'False'):
+        if not overwrite_files:
             print(f'{new_file_path} already exists, skipping')
                         
             return
